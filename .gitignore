@@ -1,0 +1,9 @@
+
+node_modules/
+.env
+.env.*
+!.env.example
+
+shopnest.db
+shopnest.db-shm
+shopnest.db-wal
