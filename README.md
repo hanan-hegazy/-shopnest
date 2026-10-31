@@ -108,4 +108,3 @@ on first run — no manual DB setup required.
   checkout to prevent overselling.
   Learning Git and GitHub
   Working on product page branch
-  Project Name: ShopNest
