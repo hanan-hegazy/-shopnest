@@ -107,3 +107,4 @@ on first run — no manual DB setup required.
 - Stock is automatically reduced when an order is placed, and checked before
   checkout to prevent overselling.
   Learning Git and GitHub
+  Working on product page branch

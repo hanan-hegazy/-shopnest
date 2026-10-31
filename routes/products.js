@@ -1,9 +1,10 @@
+
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
 const { authenticate, requireAdmin } = require('../middleware/auth');
 
-// ---------- GET all products (public, supports ?search= & ?category=) ----------
+// ---------- GET all products ----------
 router.get('/', (req, res) => {
   const { search, category } = req.query;
   let query = 'SELECT * FROM products WHERE 1=1';
@@ -23,22 +24,23 @@ router.get('/', (req, res) => {
   res.json(products);
 });
 
-// ---------- GET distinct categories (public) ----------
+// ---------- GET distinct categories ----------
 router.get('/categories', (req, res) => {
   const categories = db.prepare('SELECT DISTINCT category FROM products').all();
   res.json(categories.map((c) => c.category));
 });
 
-// ---------- GET single product (public) ----------
+// ---------- GET single product ----------
 router.get('/:id', (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) return res.status(404).json({ error: 'Product not found.' });
   res.json(product);
 });
 
-// ---------- CREATE product (admin only) ----------
+// ---------- CREATE product ----------
 router.post('/', authenticate, requireAdmin, (req, res) => {
   const { name, description, price, stock, category, image } = req.body;
+
   if (!name || !price) {
     return res.status(400).json({ error: 'Name and price are required.' });
   }
@@ -60,12 +62,13 @@ router.post('/', authenticate, requireAdmin, (req, res) => {
   res.status(201).json(product);
 });
 
-// ---------- UPDATE product (admin only) ----------
+// ---------- UPDATE product using PUT ----------
 router.put('/:id', authenticate, requireAdmin, (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) return res.status(404).json({ error: 'Product not found.' });
 
   const { name, description, price, stock, category, image } = req.body;
+
   db.prepare(
     `UPDATE products SET name=?, description=?, price=?, stock=?, category=?, image=? WHERE id=?`
   ).run(
@@ -82,7 +85,30 @@ router.put('/:id', authenticate, requireAdmin, (req, res) => {
   res.json(updated);
 });
 
-// ---------- DELETE product (admin only) ----------
+// ---------- UPDATE product using PATCH ----------
+router.patch('/:id', authenticate, requireAdmin, (req, res) => {
+  const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  if (!product) return res.status(404).json({ error: 'Product not found.' });
+
+  const { name, description, price, stock, category, image } = req.body;
+
+  db.prepare(
+    `UPDATE products SET name=?, description=?, price=?, stock=?, category=?, image=? WHERE id=?`
+  ).run(
+    name ?? product.name,
+    description ?? product.description,
+    price ?? product.price,
+    stock ?? product.stock,
+    category ?? product.category,
+    image ?? product.image,
+    req.params.id
+  );
+
+  const updated = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
+  res.json(updated);
+});
+
+// ---------- DELETE product ----------
 router.delete('/:id', authenticate, requireAdmin, (req, res) => {
   const product = db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.id);
   if (!product) return res.status(404).json({ error: 'Product not found.' });
