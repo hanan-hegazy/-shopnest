@@ -109,3 +109,4 @@ on first run — no manual DB setup required.
   Learning Git and GitHub
   Working on product page branch
   Project Name: ShopNest
+  Testing VS Code Git
